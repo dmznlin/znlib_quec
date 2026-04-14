@@ -1,8 +1,9 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
 #
 #  作者：dmzn@163.com 2026-04-13
 #  描述：全局常量、变量
 #
-# -*- coding: utf-8 -*-
 import uos
 import modem
 

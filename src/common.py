@@ -1,8 +1,9 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
 #
 #  作者：dmzn@163.com 2026-04-14
 #  描述：通用函数
 #
-# -*- coding: utf-8 -*-
 import _thread
 
 

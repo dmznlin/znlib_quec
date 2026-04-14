@@ -1,8 +1,9 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
 #
 #  作者：dmzn@163.com 2026-04-13
 #  描述：带时间、标签的日志
 #
-# -*- coding: utf-8 -*-
 import utime
 from usr.znlib.const import SysInfo
 
@@ -87,5 +88,6 @@ class Logger:
         self.log(self.name, "D", *message)
 
 
+# 日志对象
 def getLogger(name):
     return Logger(name)
