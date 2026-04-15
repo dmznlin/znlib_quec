@@ -5,13 +5,13 @@
 #  描述：带时间、标签的日志
 #
 import utime
-from usr.znlib.const import SysInfo
+from usr.znlib.const import sysInfo
 
 
 class Logger:
     def __init__(self, name):
         self.name = name
-        self.__debug = SysInfo.DEBUG
+        self.__debug = sysInfo.DEBUG
         self.__level = "D"
         self.__level_code = {
             "D": 0,  # debug

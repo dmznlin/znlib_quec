@@ -7,7 +7,7 @@
 import ujson
 import ql_fs
 import _thread
-from usr.znlib.common import Singleton, option_lock
+from usr.znlib.base import Singleton, option_lock
 
 
 class Settings(object):

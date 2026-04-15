@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 #
 #  作者：dmzn@163.com 2026-04-14
-#  描述：通用函数
+#  描述：基础类
 #
 import _thread
 

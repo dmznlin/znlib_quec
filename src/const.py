@@ -8,7 +8,7 @@ import uos
 import modem
 
 
-class SysInfo(object):
+class sysInfo(object):
     # 项目描述
     PROJECT_NAME = "znlib-quec"
     PROJECT_VERSION = "1.0.1"
