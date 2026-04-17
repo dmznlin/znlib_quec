@@ -17,5 +17,65 @@ class sysInfo(object):
     DEVICE_FIRMWARE_NAME = uos.uname()[0].split("=")[1]
     DEVICE_FIRMWARE_VERSION = modem.getDevFwVersion()
 
+    # 设备标识
+    DEVICE_IMEI = modem.getDevImei()
+    DEVICE_SN = modem.getDevSN()
+
     # 调试开关
     DEBUG = True
+
+
+class sysType(object):
+    # 数据类型映射表
+    DTYPE_SIZES = {
+        "b": 1,  # signed char
+        "B": 1,  # unsigned char
+        "h": 2,  # signed short
+        "H": 2,  # unsigned short
+        "i": 2,  # signed int
+        "I": 2,  # unsigned int
+        "l": 4,  # signed long
+        "L": 4,  # unsigned long
+        "q": 8,  # signed long long
+        "Q": 8,  # unsigned long long
+        "f": 4,  # float (DEFAULT)
+        "d": 8,  # double
+    }
+
+    # 网络模式及漫游配置
+    NET_CONFIG = {
+        0: "GSM",
+        1: "UMTS",
+        2: "GSM_UMTS(自动)",
+        3: "GSM_UMTS(GSM 优先)",
+        4: "GSM_UMTS(UMTS 优先)",
+        5: "LTE",
+        6: "GSM_LTE(自动)",
+        7: "GSM_LTE(GSM 优先)",
+        8: "GSM_LTE(LTE 优先)",
+        9: "UMTS_LTE(自动)",
+        10: "UMTS_LTE(UMTS 优先)",
+        11: "UMTS_LTE(LTE 优先)",
+        12: "GSM_UMTS_LTE(自动)",
+        13: "GSM_UMTS_LTE(GSM 优先)",
+        14: "GSM_UMTS_LTE(UMTS 优先)",
+        15: "GSM_UMTS_LTE(LTE 优先)",
+        16: "GSM_LTE(双链路)",
+        17: "UMTS_LTE(双链路)",
+        18: "GSM_UMTS_LTE(双链路)",
+        19: "CATM，BG95系列支持",
+        20: "GSM_CATM(GSM 优先)",
+        21: "CATNB, BG95系列支持",
+        22: "GSM_CATNB(GSM 优先)",
+        23: "CATM_CATNB(CATM 优先)",
+        24: "GSM_CATM_CATNB(GSM 优先)",
+        25: "CATM_GSM(CATM 优先)",
+        26: "CATNB_GSM(CATNB 优先)",
+        27: "CATNB_CATM(CATNB 优先)",
+        28: "GSM_CATNB_CATM(GSM 优先)",
+        29: "CATM_GSM_CATNB(CATM 优先)",
+        30: "CATM_CATNB_GSM(CATM 优先)",
+        31: "CATNB_GSM_CATM(CATNB 优先)",
+        32: "CATNB_CATM_GSM(CATNB 优先)",
+        33: "CATNB_GSM(企标)",
+    }

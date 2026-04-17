@@ -11,28 +11,36 @@ log = getLogger("timer")
 
 
 class timer(object):
-    def __init__(self, fun, arg, loop):
+    def __init__(self, fun, arg, auto_clear):
         self._fun = fun
         self._arg = arg
-        self._loop = loop
+        self._clear = auto_clear
 
+        self._times = 0
         self._timer = osTimer()
         self._timer_started = False
 
     def _timer_cb(self, arg):
         try:
             self._fun(*self._arg)
-        except Exception as err:
-            log.error("timer_cb", err)
+        except Exception as e:
+            log.error("timer_cb", "{}".format(e))
 
-        if not self._loop:  # 单次执行后删除
-            self.stop()
+        if self._times > 0:  # 计次结束后删除
+            self._times -= 1
+            if self._times == 0:
+                self.stop(self._clear)
 
-    # 启动计时
-    def start(self, interval):
+    def start(self, interval, times=0):
+        """
+        启动计时器
+        :param interval: 计时间隔
+        :param times: 计时次数,记完关闭
+        """
         if self._timer_started:
             self.stop(False)
-        self._timer.start(interval, 1 if self._loop else 0, self._timer_cb)
+        self._times = times
+        self._timer.start(interval, 1 if times != 1 else 0, self._timer_cb)
         self._timer_started = True
 
     # 停止计时
@@ -45,8 +53,15 @@ class timer(object):
             log.info("stop", "clear ok")
 
 
-# 定时任务
-def startTimer(fun, *arg, interval=1000, loop=True):
-    tm = timer(fun, arg, loop)
-    tm.start(interval)
+def startTimer(fun, *arg, interval=1000, auto_clear=True, times=0):
+    """
+    启动定时任务
+    :param fun: 回调函数
+    :param arg: 回调参数
+    :param interval: 计时间隔,单位毫秒
+    :param auto_clear: 计时结束清理对象
+    :param times: 计时次数,0表示不限次数
+    """
+    tm = timer(fun, arg, auto_clear)
+    tm.start(interval, times)
     return tm

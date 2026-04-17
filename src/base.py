@@ -42,8 +42,8 @@ class Singleton(object):
         if not hasattr(cls, "instance"):
             Singleton.instance = {}
 
-        if str(cls) not in Singleton.instance.keys():
-            with Singleton._instance_lock:
+        with Singleton._instance_lock:
+            if str(cls) not in Singleton.instance.keys():
                 _instance = super().__new__(cls)
                 Singleton.instance[str(cls)] = _instance
 

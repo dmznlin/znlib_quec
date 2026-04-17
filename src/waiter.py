@@ -5,6 +5,7 @@
 #  描述：异步转同步
 #
 import osTimer
+import _thread
 from queue import Queue
 
 
@@ -12,16 +13,19 @@ class waiter(object):
     def __init__(self):
         self._queue = Queue(maxsize=1)
         self._timer = None
+        self._lock = _thread.allocate_lock()
 
     # 计时结束
     def _timer_cb(self, arg):
-        if self._queue.size() == 0:
-            self._queue.put(None)
+        with self._lock:
+            if self._queue.size() == 0:
+                self._queue.put(None)
 
     # 开启等待
     def waitFor(self, timeout=0):
-        while not self._queue.empty():
-            data = self._queue.get()
+        with self._lock:
+            while not self._queue.empty():
+                data = self._queue.get()
         # clear singnal
 
         timer_started = False
@@ -41,8 +45,9 @@ class waiter(object):
     def wakeup(self, data=None):
         if data == None:
             data = 0
-        if self._queue.size() == 0:
-            self._queue.put(data)
+        with self._lock:
+            if self._queue.size() == 0:
+                self._queue.put(data)
 
 
 # 等待对象
