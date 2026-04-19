@@ -7,60 +7,50 @@
 import utime
 import _thread
 from machine import UART
+
 from usr.znlib.log import getLogger
 from usr.znlib.waiter import getWaiter
+from usr.znlib.config import loadConfig
 from usr.znlib.ringbuf import RingBuffer
 
 
 class uartSerial(object):
+    # 日志对象
     log = getLogger("serial")
 
-    def __init__(
-        self,
-        uart_id,  # UART编号
-        baudrate=115200,  # 波特率
-        databits=8,  # 数据位
-        stopbits=1,  # 停止位
-        parity=0,  # 校验位
-        flowctl=0,  # 硬件控制流
-        callback=None,  # 数据回调
-        resend=False,  # 重新发送
-        rxbuf_size=64,  # 接收缓存
-        txbuf_size=32,  # 发送缓存
-        poll_interval_ms=100,  # 轮询间隔
-        rs485_direction_pin="",  # 485翻转管脚
-    ):
-        """
-        参数说明:
-        :param resend: 发送异常时,False直接丢弃,True放入发送缓存
-        :param rxbuf_size,txbuf_size: 理想值为3倍数据,即可以缓存三份数据
-        :param poll_interval_ms: 理想值为指令间隔的1/3,即每1秒收发一次数据时,间隔为330ms
-        """
-
+    def __init__(self, cfg):
         try:
-            uart_port = getattr(UART, "UART%d" % int(uart_id))
-            self.uart = UART(uart_port, baudrate, databits, parity, stopbits, flowctl)
+            uart_port = getattr(UART, "UART%d" % int(cfg["uart"]))
+            self.uart = UART(
+                uart_port,
+                cfg["baudrate"],
+                cfg["databits"],
+                cfg["parity"],
+                cfg["stopbits"],
+                cfg["flowctl"],
+            )
 
             # init rs458 rx/tx pin
-            if rs485_direction_pin != "":
-                rs485_pin = getattr(UART, "GPIO%d" % int(rs485_direction_pin))
+            rs485 = cfg["rs485_direction_pin"]
+            if rs485 != "":
+                rs485_pin = getattr(UART, "GPIO%d" % int(rs485))
                 self.uart.control_485(rs485_pin, 1)
 
         except Exception as e:
             self.log.error("UART init failed: {}".format(e))
             return
 
-        self.callback = callback
-        self.resend = resend
-        self.poll_interval = poll_interval_ms
+        self.callback = cfg["callback"]
+        self.resend = cfg["resend"]
+        self.poll_interval = cfg["poll_interval_ms"]
 
         self._running = False
         self._tid = None
         self._err_count = 0
 
         # 环形缓冲(无符号字节)
-        self.rx_buf = RingBuffer(rxbuf_size, dtype="B")
-        self.tx_buf = RingBuffer(txbuf_size, dtype="B")
+        self.rx_buf = RingBuffer(cfg["rxbuf_size"], dtype="B")
+        self.tx_buf = RingBuffer(cfg["txbuf_size"], dtype="B")
 
         # 同步锁定
         self.tx_lock = _thread.allocate_lock()
@@ -146,5 +136,47 @@ class uartSerial(object):
             self.tx_buf.push_batch(tuple(data))
 
 
-def getSerial(fun):
-    return uartSerial(2, callback=fun)
+def getSerial(fun, cfg=None):
+    """
+    返回一个串口通讯对象
+    :param cfg: 配置名称或内容(字典)
+    """
+
+    # 默认配置
+    _cfg = {
+        "uart": 2,  # UART编号
+        "baudrate": 115200,  # 波特率
+        "databits": 8,  # 数据位
+        "stopbits": 1,  # 停止位
+        "parity": 0,  # 校验位
+        "flowctl": 0,  # 硬件控制流
+        "callback": None,  # 数据回调
+        "resend": False,  # 重新发送
+        "rxbuf_size": 64,  # 接收缓存
+        "txbuf_size": 32,  # 发送缓存
+        "poll_interval_ms": 100,  # 轮询间隔
+        "rs485_direction_pin": "",  # 485翻转管脚
+    }
+
+    """
+    参数说明:
+    :param resend: 发送异常时,False直接丢弃,True放入发送缓存
+    :param rxbuf_size,txbuf_size: 理想值为3倍数据,即可以缓存三份数据
+    :param poll_interval_ms: 理想值为指令间隔的1/3,即每1秒收发一次数据时,间隔为330ms
+    """
+
+    # 载入配置文件
+    if isinstance(cfg, str):
+        cfg_file, ok = loadConfig(cfg)
+        if ok:  # 载入配置
+            cfg = cfg_file.get()
+        else:  # 保存默认
+            cfg = None
+            cfg_file.set(_cfg)
+
+    # 合并默认值
+    if isinstance(cfg, dict):
+        _cfg.update(cfg)
+
+    _cfg["callback"] = fun
+    return uartSerial(_cfg)

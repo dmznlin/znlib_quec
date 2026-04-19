@@ -33,7 +33,8 @@ class BaseError(Exception):
 class Singleton(object):
     """Singleton base class"""
 
-    _instance_lock = _thread.allocate_lock()
+    # 低使用率公用同步锁
+    sync_lock = _thread.allocate_lock()
 
     def __init__(self, *args, **kwargs):
         pass
@@ -42,7 +43,7 @@ class Singleton(object):
         if not hasattr(cls, "instance"):
             Singleton.instance = {}
 
-        with Singleton._instance_lock:
+        with Singleton.sync_lock:
             if str(cls) not in Singleton.instance.keys():
                 _instance = super().__new__(cls)
                 Singleton.instance[str(cls)] = _instance

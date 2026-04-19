@@ -5,25 +5,23 @@
 #  描述：异步转同步
 #
 import osTimer
-import _thread
 from queue import Queue
-
+from usr.znlib.base import Singleton
 
 class waiter(object):
     def __init__(self):
         self._queue = Queue(maxsize=1)
         self._timer = None
-        self._lock = _thread.allocate_lock()
 
     # 计时结束
     def _timer_cb(self, arg):
-        with self._lock:
+        with Singleton.sync_lock:
             if self._queue.size() == 0:
                 self._queue.put(None)
 
     # 开启等待
     def waitFor(self, timeout=0):
-        with self._lock:
+        with Singleton.sync_lock:
             while not self._queue.empty():
                 data = self._queue.get()
         # clear singnal
@@ -45,7 +43,7 @@ class waiter(object):
     def wakeup(self, data=None):
         if data == None:
             data = 0
-        with self._lock:
+        with Singleton.sync_lock:
             if self._queue.size() == 0:
                 self._queue.put(data)
 

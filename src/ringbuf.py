@@ -5,7 +5,7 @@
 #  描述：环形缓冲区
 #
 from usr.znlib.const import sysType
-from usr.znlib.utils import getUtils
+from usr.znlib.utils import utils
 
 
 class RingBuffer:
@@ -125,7 +125,7 @@ class RingBuffer:
         if self.count == 0:
             return ""
         else:
-            return getUtils().data_to_hex(
+            return utils.data_to_hex(
                 self.pop_batch(self.count, True), sep_bytes, self.dtype
             )
 

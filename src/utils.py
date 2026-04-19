@@ -9,64 +9,75 @@ import net
 import uos
 import _thread
 import checkNet
+import ubinascii
 
 from misc import Power
 from machine import RTC
 from usr.znlib.const import sysInfo, sysType
 from usr.znlib.log import getLogger
-from usr.znlib.base import Singleton
+from usr.znlib.base import Singleton, BaseError
 
 
 class utils(Singleton):
     log = getLogger("utils")
 
+    # 记录异常并抛出
+    @classmethod
+    def raise_error(cls, tag, msg):
+        cls.log.error(tag, msg)
+        raise BaseError(msg)
+
     # RTC时钟
-    def now_rtc(self):
+    @classmethod
+    def now_rtc(cls):
         rtc = RTC().datetime()
         return "{}-{:02d}-{:02d}".format(*rtc[0:3]) + " {:02d}:{:02d}:{:02d}".format(
             *rtc[4:7]
         )
 
     # 打印系统信息
-    def print_moduble_info(self):
-        self.log.info("=" * 42)
+    @classmethod
+    def print_moduble_info(cls):
+        cls.log.info("=" * 42)
         try:
             import usys as sys
         except ImportError:
             import sys
         vm = sys.implementation
-        self.log.info(" python   : {}".format(sys.version))
-        self.log.info(" vm_ver   : {}.{}.{}".format(vm[1][0], vm[1][1], vm[1][2]))
+        cls.log.info(" python   : {}".format(sys.version))
+        cls.log.info(" vm_ver   : {}.{}.{}".format(vm[1][0], vm[1][1], vm[1][2]))
 
-        self.log.info(" pro_ver  : {}".format(sysInfo.PROJECT_VERSION))
-        self.log.info(" project  : {}".format(sysInfo.PROJECT_NAME))
-        self.log.info(" firmware : {}".format(sysInfo.DEVICE_FIRMWARE_NAME))
-        self.log.info(" firm_ver : {}".format(sysInfo.DEVICE_FIRMWARE_VERSION))
-        self.log.info(" dev_imei : {}".format(sysInfo.DEVICE_IMEI))
-        self.log.info(" dev_sn   : {}".format(sysInfo.DEVICE_SN))
+        cls.log.info(" pro_ver  : {}".format(sysInfo.PROJECT_VERSION))
+        cls.log.info(" project  : {}".format(sysInfo.PROJECT_NAME))
+        cls.log.info(" firmware : {}".format(sysInfo.DEVICE_FIRMWARE_NAME))
+        cls.log.info(" firm_ver : {}".format(sysInfo.DEVICE_FIRMWARE_VERSION))
+        cls.log.info(" dev_imei : {}".format(sysInfo.DEVICE_IMEI))
+        cls.log.info(" dev_sn   : {}".format(sysInfo.DEVICE_SN))
 
-        self.log.info(" free_ram : {} Bytes".format(gc.mem_free()))
-        self.log.info(" free_rom : {} Bytes".format(_thread.get_heap_size()))
+        cls.log.info(" free_ram : {} Bytes".format(gc.mem_free()))
+        cls.log.info(" free_rom : {} Bytes".format(_thread.get_heap_size()))
         usr = uos.statvfs("/usr")
-        self.log.info(" free_usr : {} Bytes".format(usr[0] * usr[3]))
-        self.log.info(" vbat     : {} mV".format(Power.getVbatt()))
+        cls.log.info(" free_usr : {} Bytes".format(usr[0] * usr[3]))
+        cls.log.info(" vbat     : {} mV".format(Power.getVbatt()))
 
-        self.log.info(" OPERATOR : {} ".format(net.operatorName()))
+        cls.log.info(" OPERATOR : {} ".format(net.operatorName()))
         cfg = sysType.NET_CONFIG.get(net.getConfig()[0], "UNKNOWN")
-        self.log.info(" NET      : {} ".format(cfg))
-        self.log.info(" CSQ      : {} ".format(net.csqQueryPoll()))
-        self.log.info(" RTC      : {} ".format(self.now_rtc()))
-        self.log.info("=" * 42)
+        cls.log.info(" NET      : {} ".format(cfg))
+        cls.log.info(" CSQ      : {} ".format(net.csqQueryPoll()))
+        cls.log.info(" RTC      : {} ".format(cls.now_rtc()))
+        cls.log.info("=" * 42)
 
     # 文件是否存在
-    def file_exists(self, file_full):
+    @classmethod
+    def file_exists(cls, file_full):
         try:
             stat = uos.stat(file_full)
             return stat[-4] >= 0  # 大小
         except:
             return False
 
-    def data_to_hex(self, data, sep_bytes=True, dtype="B"):
+    @classmethod
+    def data_to_hex(cls, data, sep_bytes=True, dtype="B"):
         """
         将 list/tuple 转换为十六进制字符串
         :param data: list 或 tuple（元素为 int 或 bytes/bytearray）
@@ -74,10 +85,13 @@ class utils(Singleton):
         :param dtype: 数据类型标识，默认 'B' (unsigned char)
         :return: 十六进制字符串
         """
-        if not isinstance(data, (list, tuple)):
-            raise TypeError("data must be a list or tuple")
+        if isinstance(data, str):
+            dtype = "B"
+            data = data.encode("utf-8")
+        elif not isinstance(data, (list, tuple)):
+            cls.raise_error("data_to_hex", "data must be a list or tuple")
         if dtype not in sysType.DTYPE_SIZES:
-            raise ValueError("Unsupported dtype: {}".format(dtype))
+            cls.raise_error("data_to_hex", "Unsupported dtype: {}".format(dtype))
 
         size = sysType.DTYPE_SIZES[dtype]
         width = size * 2  # 单个元素占用的 HEX 字符数
@@ -101,7 +115,8 @@ class utils(Singleton):
             return " ".join([full_hex[i : i + 2] for i in range(0, len(full_hex), 2)])
         return full_hex
 
-    def hex_to_data(self, data, dtype="B"):
+    @classmethod
+    def hex_to_data(cls, data, dtype="B"):
         """
         将十六进制字符串解析为元组
         :param data: 十六进制字符串（可含任意空白分隔）
@@ -110,9 +125,9 @@ class utils(Singleton):
         :return: 解析后的整数元组（有符号类型自动转补码）
         """
         if not isinstance(data, str):
-            raise TypeError("data must be a string")
+            cls.raise_error("hex_to_data", "data must be a string")
         if dtype not in sysType.DTYPE_SIZES:
-            raise ValueError("Unsupported dtype: {}".format(dtype))
+            cls.raise_error("hex_to_data", "Unsupported dtype: {}".format(dtype))
 
         size = sysType.DTYPE_SIZES[dtype]
         width = size * 2  # 单个元素预期的 HEX 字符数
@@ -129,10 +144,11 @@ class utils(Singleton):
         if len(clean_hex) == 0:
             return tuple()
         if len(clean_hex) % width != 0:
-            raise ValueError(
+            cls.raise_error(
+                "hex_to_data",
                 "Hex length not aligned with dtype width ({} chars per item)".format(
                     width
-                )
+                ),
             )
 
         bits = 8 * size
@@ -146,7 +162,9 @@ class utils(Singleton):
             try:
                 val = int(chunk, 16)
             except ValueError:
-                raise ValueError("Invalid hex sequence: '{}'".format(chunk))
+                cls.raise_error(
+                    "hex_to_data", "Invalid hex sequence: '{}'".format(chunk)
+                )
 
             # 有符号类型自动进行符号扩展（C 语言兼容行为）
             if is_signed and val >= half_max:
@@ -155,21 +173,69 @@ class utils(Singleton):
 
         return res
 
-    def data_to_str(self, data):
+    @classmethod
+    def data_to_str(cls, data):
         """
         将list/tuple/bytes转为字符串
         :param data: 待解析的数据内容
         """
         if isinstance(data, str):
             return data
-        
+
         if isinstance(data, int):
             data = bytes([data])
         elif not isinstance(data, (list, tuple, bytes, bytearray)):
-            raise TypeError("Unsupported send data type")
+            cls.raise_error("data_to_str", "Unsupported send data type")
         return "".join([chr(element) for element in data])
 
+    @classmethod
+    def encode_base64(cls, data):
+        """
+        将str/list/tuple/bytes统一转换为bytes后再进行Base64编码。
+        :param data: 待编码的数据 (str, list, tuple, or bytes)
+        :return: Base64编码后的bytes对象
+        :raises TypeError: 如果输入类型不受支持
+        :raises ValueError: 如果list/tuple中包含无法转换为字节的元素
+        """
+        if isinstance(data, bytes):
+            # 直接路径：输入已是bytes，无需转换
+            byte_data = data
+        elif isinstance(data, str):
+            # 字符串路径：使用UTF-8编码转换为bytes
+            byte_data = data.encode("utf-8")
+        elif isinstance(data, (list, tuple)):
+            # 容器路径：将容器内的整数转换为bytes
+            # 只有在0-255范围内的整数才能被视作合法的字节值
+            byte_list = []
+            for item in data:
+                if not isinstance(item, int) or not (0 <= item < 256):
+                    cls.raise_error(
+                        "encode_base64",
+                        "list or tuple elements-{} must be integers in range [0, 255].".format(
+                            item
+                        ),
+                    )
+                byte_list.append(item)
+            byte_data = bytes(byte_list)
+        else:
+            # 其他不支持的类型
+            cls.raise_error(
+                "encode_base64",
+                "Unsupported data type for encoding: {}".format(type(data).__name__),
+            )
 
-# 辅助工具
-def getUtils():
-    return utils()
+        # 调用ubinascii模块进行Base64编码
+        # b2a_base64返回值已包含换行符 [[5]]
+        return ubinascii.b2a_base64(byte_data)
+
+    @classmethod
+    def decode_base64(cls, base64_str):
+        """
+        将Base64编码的字符串解码为原始的字节数据。
+        :param base64_str: Base64编码的字符串
+        :return: 解码后的bytes对象
+        :raises ValueError: 如果输入的字符串格式不正确，不符合Base64规范
+        """
+        # 直接调用ubinascii模块进行解码
+        # 输入必须是有效的Base64字符串 [[1,2]]
+        return ubinascii.a2b_base64(base64_str)
