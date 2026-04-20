@@ -7,10 +7,11 @@
 import osTimer
 from usr.znlib.log import getLogger
 
-log = getLogger("timer")
-
 
 class timer(object):
+    # 日志对象
+    log = getLogger("timer")
+
     def __init__(self, fun, arg, auto_clear):
         self._fun = fun
         self._arg = arg
@@ -24,7 +25,7 @@ class timer(object):
         try:
             self._fun(*self._arg)
         except Exception as e:
-            log.error("timer_cb", "{}".format(e))
+            self.log.error("timer_cb", "{}".format(e))
 
         if self._times > 0:  # 计次结束后删除
             self._times -= 1
@@ -44,13 +45,16 @@ class timer(object):
         self._timer_started = True
 
     # 停止计时
-    def stop(self, clear=True):
+    def stop(self, clear=None):
         if self._timer_started:
             self._timer.stop()
             self._timer_started = False
+
+        if clear is None:
+            clear = self._clear
         if clear:
             self._timer.delete_timer()
-            log.info("stop", "clear ok")
+            self.log.info("stop", "clear ok")
 
 
 def startTimer(fun, *arg, interval=1000, auto_clear=True, times=0):

@@ -96,12 +96,11 @@ class uartSerial(object):
                 utime.sleep_ms(self.poll_interval)
 
             except Exception as e:
+                self.log.error("rx_loop", "{}".format(e))
                 # 连续异常熔断，防止拖垮 Modem 协议栈
                 self._err_count += 1
                 if self._err_count > 10:
                     self._running = False
-
-                self.log.error("rx_loop", "{}".format(e))
                 utime.sleep_ms(50)
 
         # 退出信号

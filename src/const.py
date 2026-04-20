@@ -8,7 +8,7 @@ import uos
 import modem
 
 
-class sysInfo(object):
+class sysInfo:
     # 项目描述
     PROJECT_NAME = "znlib-quec"
     PROJECT_VERSION = "1.0.1"
@@ -25,7 +25,15 @@ class sysInfo(object):
     DEBUG = True
 
 
-class sysType(object):
+class byteOrder:
+    # 大端序列
+    big = "big"
+
+    # 小端序列
+    little = "little"
+
+
+class sysType:
     # 数据类型映射表
     DTYPE_SIZES = {
         "b": 1,  # signed char

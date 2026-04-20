@@ -112,10 +112,49 @@ class RingBuffer:
             self.count -= actual
         return res
 
-    def peek(self):
+    def pick_range(self):
+        """
+        数据范围下标
+        :param begin: 开始索引
+        :param end: 索引上限(不包括)
+        """
         if self.count == 0:
-            return None
-        return self.buffer[self.head]
+            return 0, 0
+        return self.head, self.head + self.count
+
+    def r_i(self, _index):
+        """
+        获取真实下标(read-index)
+        :param _index: 下标值
+        """
+        if _index < self.capacity:
+            return _index
+        return _index % self.capacity
+
+    def pick_move(self, _index):
+        """
+        移动至指定下标
+        :param _index: 下标值
+        """
+        self.head = self.r_i(_index)
+        if self.head <= self.tail:  # 未折返
+            self.count = self.tail - self.head
+        else:  # 数据折返
+            self.count = self.capacity - self.head + self.tail
+
+    def pick_data(self, start, end):
+        """
+        获取下标[start:end]的数据
+        :param start,end: 下标,前闭后开
+        """
+        start = self.r_i(start)
+        end = self.r_i(end)
+        if start <= end:
+            return self.buffer[start:end]
+
+        res = self.buffer[start : self.capacity]
+        res.extend(self.buffer[0 : self.r_i(end)])
+        return res
 
     def print_hex(self, sep_bytes=True):
         """
