@@ -6,9 +6,10 @@
 #
 import ujson
 import _thread
-from usr.znlib.utils import utils
-from usr.znlib.log import getLogger
-from usr.znlib.base import Singleton, option_lock
+
+from .znlib_utils import utils
+from .znlib_log import getLogger
+from .znlib_base import Singleton, option_lock
 
 
 class settings(object):

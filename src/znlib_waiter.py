@@ -6,7 +6,8 @@
 #
 import osTimer
 from queue import Queue
-from usr.znlib.base import Singleton
+from .znlib_base import Singleton
+
 
 class waiter(object):
     def __init__(self):
@@ -16,7 +17,7 @@ class waiter(object):
     # 计时结束
     def _timer_cb(self, arg):
         with Singleton.sync_lock:
-            if self._queue.size() == 0:
+            if self._queue.empty():
                 self._queue.put(None)
 
     # 开启等待
@@ -28,7 +29,7 @@ class waiter(object):
 
         timer_started = False
         if timeout > 0:
-            if self._timer == None:
+            if self._timer is None:
                 self._timer = osTimer()
             self._timer.start(timeout, 0, self._timer_cb)
             timer_started = True
@@ -44,7 +45,7 @@ class waiter(object):
         if data == None:
             data = 0
         with Singleton.sync_lock:
-            if self._queue.size() == 0:
+            if self._queue.empty():
                 self._queue.put(data)
 
 

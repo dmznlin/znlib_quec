@@ -28,9 +28,81 @@ class sysInfo:
 class byteOrder:
     # 大端序列
     big = "big"
-
     # 小端序列
     little = "little"
+
+
+class timerMode:
+    # 单次
+    ONE_SHOT = 0
+    # 周期
+    PERIODIC = 1
+
+
+class msgType:
+    # at 消息
+    AT_MODE = 0
+    # RFC1662协议
+    RFC1662 = 1
+    # SMS 消息
+    SMS = 2
+    # 客户端消息
+    TCP_CLI = 3
+    # 服务端消息
+    TCP_SER = 4
+
+
+class cmdMode:
+    # 查询模式
+    READ = "read"
+    # 设置模式
+    WRITE = "write"
+    # 其他
+    OTHER = "other"
+    # active
+    ACTIVE = "active"
+
+
+class tcpMode:
+    """
+    模块TCP连接模式,客户端模式或服务端模式
+    """
+
+    CLIENT_MODE = 0
+    SERVER_MODE = 1
+    MIX_MODE = 2
+    MAX_TCP_MODE = 3
+
+
+class socketError:
+    ERR_AGAIN = -1
+    ERR_SUCCESS = 0
+    ERR_NOMEM = 1
+    ERR_PROTOCOL = 2
+    ERR_INVAL = 3
+    ERR_NO_CONN = 4
+    ERR_CONN_REFUSED = 5
+    ERR_NOT_FOUND = 6
+    ERR_CONN_LOST = 7
+    ERR_PAYLOAD_SIZE = 9
+    ERR_NOT_SUPPORTED = 10
+    ERR_UNKNOWN = 13
+    ERR_ERRNO = 14
+
+
+class socketState:
+    STA_ERROR = -1
+    STA_CLOSED = 0
+    STA_LISTEN = 1
+    STA_SYN_SENT = 2
+    STA_SYN_RCVD = 3
+    STA_ESTABLISHED = 4
+    STA_FIN_WAIT_1 = 5
+    STA_FIN_WAIT_2 = 6
+    STA_CLOSE_WAIT = 7
+    STA_CLOSING = 8
+    STA_LAST_ACK = 9
+    STA_TIME_WAIT = 10
 
 
 class sysType:

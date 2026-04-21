@@ -1,0 +1,5 @@
+{
+  "uart": "uart",
+  "timeout_ms": 1000,
+  "slavers": {}
+}

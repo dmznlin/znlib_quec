@@ -5,7 +5,7 @@
 #  描述：带时间、标签的日志
 #
 import utime
-from usr.znlib.const import sysInfo
+from .znlib_const import sysInfo
 
 
 class Logger:

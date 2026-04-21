@@ -4,8 +4,8 @@
 #  作者：dmzn@163.com 2026-04-16
 #  描述：环形缓冲区
 #
-from usr.znlib.const import sysType
-from usr.znlib.utils import utils
+from .znlib_const import sysType
+from .znlib_utils import utils
 
 
 class RingBuffer:

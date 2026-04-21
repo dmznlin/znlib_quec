@@ -5,7 +5,8 @@
 #  描述：计时器
 #
 import osTimer
-from usr.znlib.log import getLogger
+from .znlib_log import getLogger
+from .znlib_const import timerMode
 
 
 class timer(object):
@@ -41,7 +42,11 @@ class timer(object):
         if self._timer_started:
             self.stop(False)
         self._times = times
-        self._timer.start(interval, 1 if times != 1 else 0, self._timer_cb)
+        self._timer.start(
+            interval,
+            timerMode.PERIODIC if times != 1 else timerMode.ONE_SHOT,
+            self._timer_cb,
+        )
         self._timer_started = True
 
     # 停止计时

@@ -1,0 +1,13 @@
+{
+  "uart": 2,
+  "baudrate": 115200,
+  "databits": 8,
+  "stopbits": 1,
+  "parity": 0,
+  "flowctl": 0,
+  "resend": false,
+  "rxbuf_size": 64,
+  "txbuf_size": 32,
+  "poll_interval_ms": 100,
+  "rs485_direction_pin": ""
+}

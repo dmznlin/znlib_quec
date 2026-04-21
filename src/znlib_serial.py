@@ -8,10 +8,10 @@ import utime
 import _thread
 from machine import UART
 
-from usr.znlib.log import getLogger
-from usr.znlib.waiter import getWaiter
-from usr.znlib.config import loadConfig
-from usr.znlib.ringbuf import RingBuffer
+from .znlib_log import getLogger
+from .znlib_waiter import getWaiter
+from .znlib_config import loadConfig
+from .znlib_ringbuf import RingBuffer
 
 
 class uartSerial(object):

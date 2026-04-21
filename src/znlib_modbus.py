@@ -5,11 +5,11 @@
 #  描述：modbus rtu over serial
 #
 import time
-from usr.znlib.log import getLogger
-from usr.znlib.const import byteOrder
-from usr.znlib.serial import getSerial
-from usr.znlib.waiter import getWaiter
-from usr.znlib.config import loadConfig
+from .znlib_log import getLogger
+from .znlib_const import byteOrder
+from .znlib_serial import getSerial
+from .znlib_waiter import getWaiter
+from .znlib_config import loadConfig
 
 
 class modbusClient:

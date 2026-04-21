@@ -13,9 +13,9 @@ import ubinascii
 
 from misc import Power
 from machine import RTC
-from usr.znlib.const import sysInfo, sysType
-from usr.znlib.log import getLogger
-from usr.znlib.base import Singleton, BaseError
+from .znlib_const import sysInfo, sysType
+from .znlib_log import getLogger
+from .znlib_base import Singleton, BaseError
 
 
 class utils(Singleton):
