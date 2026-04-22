@@ -9,7 +9,7 @@ import _thread
 
 from .znlib_utils import utils
 from .znlib_log import getLogger
-from .znlib_base import Singleton, option_lock
+from .znlib_base import singleton, option_lock
 
 
 class settings(object):
@@ -37,7 +37,7 @@ class settings(object):
             self.log.error("remove", "file:{} error:{}".format(self.setting_file, e))
             return False
 
-    @option_lock(Singleton.sync_lock)
+    @option_lock(singleton.sync_lock)
     def load(self):
         if utils.file_exists(self.setting_file):
             try:
@@ -50,20 +50,20 @@ class settings(object):
             self.log.error("load", "{} not found".format(self.setting_file))
         return False
 
-    @option_lock(Singleton.sync_lock)
+    @option_lock(singleton.sync_lock)
     def get(self):
         return self.settings
 
-    @option_lock(Singleton.sync_lock)
+    @option_lock(singleton.sync_lock)
     def set(self, val):
         self.settings = val
         return self.__save_config()
 
-    @option_lock(Singleton.sync_lock)
+    @option_lock(singleton.sync_lock)
     def save(self):
         return self.__save_config()
 
-    @option_lock(Singleton.sync_lock)
+    @option_lock(singleton.sync_lock)
     def remove(self):
         return self.__remove_config()
 

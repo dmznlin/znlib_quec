@@ -15,17 +15,17 @@ from misc import Power
 from machine import RTC
 from .znlib_const import sysInfo, sysType
 from .znlib_log import getLogger
-from .znlib_base import Singleton, BaseError
+from .znlib_base import singleton, baseError
 
 
-class utils(Singleton):
+class utils(singleton):
     log = getLogger("utils")
 
     # 记录异常并抛出
     @classmethod
     def raise_error(cls, tag, msg):
         cls.log.error(tag, msg)
-        raise BaseError(msg)
+        raise baseError(msg)
 
     # RTC时钟
     @classmethod

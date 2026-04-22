@@ -8,6 +8,7 @@ import utime
 import _thread
 from machine import UART
 
+from .znlib_base import locker
 from .znlib_log import getLogger
 from .znlib_waiter import getWaiter
 from .znlib_config import loadConfig
@@ -53,7 +54,7 @@ class uartSerial(object):
         self.tx_buf = RingBuffer(cfg["txbuf_size"], dtype="B")
 
         # 同步锁定
-        self.tx_lock = _thread.allocate_lock()
+        self.tx_lock = locker()
 
         # 等待对象
         self.waiter = getWaiter()

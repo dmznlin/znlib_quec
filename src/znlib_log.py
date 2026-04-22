@@ -4,7 +4,9 @@
 #  作者：dmzn@163.com 2026-04-13
 #  描述：带时间、标签的日志
 #
+import usys
 import utime
+from uio import StringIO
 from .znlib_const import sysInfo
 
 
@@ -75,8 +77,12 @@ class Logger:
     def critical(self, *message):
         self.log(self.name, "C", *message)
 
-    def error(self, *message):
+    def error(self, *message, obj=None):
         self.log(self.name, "E", *message)
+        if not obj is None:
+            io = StringIO()
+            usys.print_exception(obj, io)
+            print(io.getvalue())
 
     def warn(self, *message):
         self.log(self.name, "W", *message)

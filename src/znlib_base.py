@@ -7,6 +7,43 @@
 import _thread
 
 
+class locker(object):
+    """同步锁定"""
+
+    def __init__(self):
+        self._lock = _thread.allocate_lock()
+        self._owner = None
+
+    def __del__(self):
+        _thread.delete_lock(self._lock)
+
+    def __enter__(self):
+        return self.enter()
+
+    def __exit__(self, *args, **kwargs):
+        self.leave()
+
+    @property
+    def owner(self):
+        return self._owner
+
+    @property
+    def is_owned(self):
+        return self._lock.locked() and self._lock.owner == _thread.get_ident()
+
+    def enter(self):
+        flag = self._lock.acquire()
+        self._owner = _thread.get_ident()
+        return flag
+
+    def leave(self):
+        self._owner = None
+        return self._lock.release()
+
+    def locked(self):
+        return self._lock.locked()
+
+
 def option_lock(thread_lock):
     """Function thread lock decorator"""
 
@@ -20,8 +57,8 @@ def option_lock(thread_lock):
     return function_lock
 
 
-class BaseError(Exception):
-    """Exception base class"""
+class baseError(Exception):
+    """异常基类"""
 
     def __init__(self, value):
         self.value = value
@@ -30,11 +67,11 @@ class BaseError(Exception):
         return repr(self.value)
 
 
-class Singleton(object):
-    """Singleton base class"""
+class singleton(object):
+    """单实例基类"""
 
     # 低使用率公用同步锁
-    sync_lock = _thread.allocate_lock()
+    sync_lock = locker()
 
     def __init__(self, *args, **kwargs):
         pass
