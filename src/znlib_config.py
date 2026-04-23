@@ -13,12 +13,13 @@ from .znlib_base import singleton, option_lock
 
 
 class settings(object):
-    log = getLogger("settings")
-
     def __init__(self, setting_name):
         # 规避模块传输异常,使用 txt 扩展名
         self.setting_file = "/usr/znlib/{}.txt".format(setting_name)
         self.settings = {}
+
+        # 日志对象
+        self.log = getLogger("settings")
 
     def __save_config(self):
         try:

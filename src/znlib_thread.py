@@ -4,6 +4,7 @@
 #  作者：dmzn@163.com 2026-04-22
 #  描述：线程相关
 #
+import usys
 import _thread
 from .znlib_base import baseError
 from .znlib_waiter import getWaiter
@@ -20,13 +21,13 @@ class waitResult(object):
     def set(self, res=None, err=None):
         self._result = res
         self._error = err
-        self._waiter.wakup()
+        self._waiter.wakeup()
 
     def get(self, timeout=0):
-        if self._waiter.waitFor(timeout):
-            return self._result, self._error
-        else:
+        if self._waiter.waitFor(timeout) is None:
             return None, baseError("get result timeout.")
+        else:
+            return self._result, self._error
 
 
 class innerThread(object):
@@ -65,13 +66,12 @@ class innerThread(object):
     def run(self, result):
         try:
             rv = self._fun(*self._args, **self._kwargs)
+            if result:
+                result.set(res=rv)
         except Exception as e:
             usys.print_exception(e)
             if result:
                 result.set(err=e)
-        else:
-            if result:
-                result.set(res=rv)
 
     @property
     def ident(self):

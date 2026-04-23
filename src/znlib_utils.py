@@ -13,7 +13,7 @@ import ubinascii
 
 from misc import Power
 from machine import RTC
-from .znlib_const import sysInfo, sysType
+from .znlib_const import sysInfo, dt, netCls
 from .znlib_log import getLogger
 from .znlib_base import singleton, baseError
 
@@ -61,7 +61,7 @@ class utils(singleton):
         cls.log.info(" vbat     : {} mV".format(Power.getVbatt()))
 
         cls.log.info(" OPERATOR : {} ".format(net.operatorName()))
-        cfg = sysType.NET_CONFIG.get(net.getConfig()[0], "UNKNOWN")
+        cfg = netCls.config.get(net.getConfig()[0], "UNKNOWN")
         cls.log.info(" NET      : {} ".format(cfg))
         cls.log.info(" CSQ      : {} ".format(net.csqQueryPoll()))
         cls.log.info(" RTC      : {} ".format(cls.now_rtc()))
@@ -90,10 +90,10 @@ class utils(singleton):
             data = data.encode("utf-8")
         elif not isinstance(data, (list, tuple)):
             cls.raise_error("data_to_hex", "data must be a list or tuple")
-        if dtype not in sysType.DTYPE_SIZES:
+        if dtype not in dt.sizes:
             cls.raise_error("data_to_hex", "Unsupported dtype: {}".format(dtype))
 
-        size = sysType.DTYPE_SIZES[dtype]
+        size = dt.sizes[dtype]
         width = size * 2  # 单个元素占用的 HEX 字符数
         mask = (1 << (8 * size)) - 1
         fmt = "%0{}X".format(width)
@@ -126,10 +126,10 @@ class utils(singleton):
         """
         if not isinstance(data, str):
             cls.raise_error("hex_to_data", "data must be a string")
-        if dtype not in sysType.DTYPE_SIZES:
+        if dtype not in dt.sizes:
             cls.raise_error("hex_to_data", "Unsupported dtype: {}".format(dtype))
 
-        size = sysType.DTYPE_SIZES[dtype]
+        size = dt.sizes[dtype]
         width = size * 2  # 单个元素预期的 HEX 字符数
 
         # 移除所有空白字符（兼容空格、换行、制表符等日志格式）

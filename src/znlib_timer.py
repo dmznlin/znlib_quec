@@ -10,9 +10,6 @@ from .znlib_const import timerMode
 
 
 class timer(object):
-    # 日志对象
-    log = getLogger("timer")
-
     def __init__(self, fun, arg, auto_clear):
         self._fun = fun
         self._arg = arg
@@ -21,6 +18,9 @@ class timer(object):
         self._times = 0
         self._timer = osTimer()
         self._timer_started = False
+
+        # 日志对象
+        self.log = getLogger("timer")
 
     def _timer_cb(self, arg):
         try:

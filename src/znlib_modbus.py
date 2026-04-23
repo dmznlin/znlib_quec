@@ -5,8 +5,9 @@
 #  描述：modbus rtu over serial
 #
 import time
+import ustruct
 from .znlib_log import getLogger
-from .znlib_const import byteOrder
+from .znlib_const import byteOrder, dt
 from .znlib_serial import getSerial
 from .znlib_waiter import getWaiter
 from .znlib_config import loadConfig
@@ -22,9 +23,6 @@ class modbusClient:
     WRITE_SINGLE_REGISTER = 0x06
     WRITE_MULTIPLE_COILS = 0x0F
     WRITE_MULTIPLE_REGISTERS = 0x10
-
-    # 日志对象
-    log = getLogger("modbus")
 
     def __init__(self, cfg):
         """
@@ -42,6 +40,9 @@ class modbusClient:
 
         # 等待对象
         self.waiter = getWaiter()
+
+        # 日志对象
+        self.log = getLogger("modbus")
 
     def connect(self, active):
         if active:  # 打开连接
@@ -190,6 +191,18 @@ class modbusClient:
             is not None
         )
 
+    def write_multiple_coils(self, slave_id, addr, coil_num, value):
+        fmt = dt.fmt(dt.big, dt.ushort, dt.uchar)
+        payload = bytearray(ustruct.pack(fmt, coil_num, len(values) * 2))  # 大端2+1
+
+        for val in values:
+            payload.extend(val.to_bytes(2, byteOrder.big))
+
+        return (
+            self._send_request(slave_id, self.WRITE_MULTIPLE_COILS, addr, 0, payload)
+            is not None
+        )
+
     def write_single_register(self, slave_id, addr, value):
         payload = value.to_bytes(2, byteOrder.big)
         return (
@@ -198,8 +211,10 @@ class modbusClient:
         )
 
     def write_multiple_registers(self, slave_id, start_addr, values):
-        byte_count = len(values) * 2
-        payload = bytearray([byte_count])
+        num = len(values)
+        fmt = dt.fmt(dt.big, dt.ushort, dt.uchar)
+        payload = bytearray(ustruct.pack(fmt, num, num * 2))  # 大端2+1
+
         for val in values:
             payload.extend(val.to_bytes(2, byteOrder.big))
 
@@ -208,7 +223,7 @@ class modbusClient:
                 slave_id,
                 self.WRITE_MULTIPLE_REGISTERS,
                 start_addr,
-                len(values),
+                0,
                 payload,
             )
             is not None

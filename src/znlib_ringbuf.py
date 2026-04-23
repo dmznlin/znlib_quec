@@ -4,7 +4,7 @@
 #  作者：dmzn@163.com 2026-04-16
 #  描述：环形缓冲区
 #
-from .znlib_const import sysType
+from .znlib_const import dt
 from .znlib_utils import utils
 
 
@@ -18,10 +18,10 @@ class RingBuffer:
     """
 
     def __init__(self, capacity, dtype="B"):
-        if dtype not in sysType.DTYPE_SIZES:
+        if dtype not in dt.sizes:
             raise ValueError(
                 "Unsupported dtype: '{}'. Must be one of {}".format(
-                    dtype, list(sysType.DTYPE_SIZES.keys())
+                    dtype, list(dt.sizes.keys())
                 )
             )
 
@@ -153,7 +153,7 @@ class RingBuffer:
             return self.buffer[start:end]
 
         res = self.buffer[start : self.capacity]
-        res.extend(self.buffer[0 : self.r_i(end)])
+        res.extend(self.buffer[0:end])
         return res
 
     def print_hex(self, sep_bytes=True):

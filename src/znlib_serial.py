@@ -16,9 +16,6 @@ from .znlib_ringbuf import RingBuffer
 
 
 class uartSerial(object):
-    # 日志对象
-    log = getLogger("serial")
-
     def __init__(self, cfg):
         try:
             uart_port = getattr(UART, "UART%d" % int(cfg["uart"]))
@@ -58,6 +55,9 @@ class uartSerial(object):
 
         # 等待对象
         self.waiter = getWaiter()
+
+        # 日志对象
+        self.log = getLogger("serial")
 
     def _rx_loop(self):
         # 单次刷 TX 最大字节数，防止大对象分配引发 GC 停顿

@@ -6,6 +6,7 @@
 #
 import uos
 import modem
+from .znlib_base import baseError
 
 
 class sysInfo:
@@ -30,6 +31,49 @@ class byteOrder:
     big = "big"
     # 小端序列
     little = "little"
+
+
+class dt:
+    # bit order
+    big = ">"  # big-endian
+    little = "<"  # little-endian
+
+    # data type
+    char = "b"  # signed char
+    uchar = "B"  # unsigned char
+    short = "h"  # signed short
+    ushort = "H"  # unsigned short
+    int_ = "i"  # signed int
+    uint = "I"  # unsigned int
+    long = "l"  # signed long
+    ulong = "L"  # unsigned long
+    llong = "q"  # signed long long
+    ullong = "Q"  # unsigned long long
+    floag = "f"  # float (DEFAULT)
+    double = "d"  # double
+
+    # 数据类型映射表
+    sizes = {
+        "b": 1,  # signed char
+        "B": 1,  # unsigned char
+        "h": 2,  # signed short
+        "H": 2,  # unsigned short
+        "i": 2,  # signed int
+        "I": 2,  # unsigned int
+        "l": 4,  # signed long
+        "L": 4,  # unsigned long
+        "q": 8,  # signed long long
+        "Q": 8,  # unsigned long long
+        "f": 4,  # float (DEFAULT)
+        "d": 8,  # double
+    }
+
+    @classmethod
+    def fmt(cls, *data):
+        """
+        构建 ustruct 所需的格式字符串
+        """
+        return "".join(data)
 
 
 class timerMode:
@@ -105,25 +149,9 @@ class socketState:
     STA_TIME_WAIT = 10
 
 
-class sysType:
-    # 数据类型映射表
-    DTYPE_SIZES = {
-        "b": 1,  # signed char
-        "B": 1,  # unsigned char
-        "h": 2,  # signed short
-        "H": 2,  # unsigned short
-        "i": 2,  # signed int
-        "I": 2,  # unsigned int
-        "l": 4,  # signed long
-        "L": 4,  # unsigned long
-        "q": 8,  # signed long long
-        "Q": 8,  # unsigned long long
-        "f": 4,  # float (DEFAULT)
-        "d": 8,  # double
-    }
-
+class netCls:
     # 网络模式及漫游配置
-    NET_CONFIG = {
+    config = {
         0: "GSM",
         1: "UMTS",
         2: "GSM_UMTS(自动)",
