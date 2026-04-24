@@ -78,11 +78,10 @@ class singleton(object):
 
     def __new__(cls, *args, **kwargs):
         if not hasattr(cls, "instance"):
-            Singleton.instance = {}
+            singleton.instance = {}
 
-        with Singleton.sync_lock:
-            if str(cls) not in Singleton.instance.keys():
+        with singleton.sync_lock:
+            if str(cls) not in singleton.instance.keys():
                 _instance = super().__new__(cls)
-                Singleton.instance[str(cls)] = _instance
-
-        return Singleton.instance[str(cls)]
+                singleton.instance[str(cls)] = _instance
+        return singleton.instance[str(cls)]

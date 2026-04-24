@@ -7,6 +7,71 @@
 import osTimer
 from .znlib_log import getLogger
 from .znlib_const import timerMode
+from .znlib_base import singleton, locker
+
+
+class jobTimer(singleton):
+    """
+    处理小事务的计时器
+    """
+
+    def __init__(self):
+        if hasattr(self, "_initialized"):
+            return  # 已初始化
+        self._initialized = True
+
+        self._jobs = dict()
+        self._lock = locker()
+        self._timer = osTimer()
+        self._timer_started = False
+
+        # 日志对象
+        self.log = getLogger("jobTimer")
+
+    def run(self, fun, *arg):
+        with self._lock:
+            self._jobs[fun] = arg
+
+        if not self._timer_started:
+            self._timer.start(
+                1000,
+                timerMode.PERIODIC,
+                self._do_job,
+            )
+
+            self._timer_started = True
+
+    def _do_job(self, arg):
+        while True:
+            fun = None
+            arg = ()
+            with self._lock:
+                if len(self._jobs) > 0:
+                    item = self._jobs.popitem()
+                    fun = item[0]
+                    arg = item[1]
+
+            if fun is None:
+                break
+            try:
+                fun(*arg)
+            except Exception as e:
+                self.log.error(":" * 32, obj=e)
+
+        self._timer.stop()
+        self._timer_started = False
+
+
+def jobs():
+    """
+    启动作业计时器
+    """
+    return jobTimer()
+
+
+def _del_timer(_timer):
+    # 异步执行删除
+    _timer.delete_timer()
 
 
 class timer(object):
@@ -31,7 +96,10 @@ class timer(object):
         if self._times > 0:  # 计次结束后删除
             self._times -= 1
             if self._times == 0:
-                self.stop(self._clear)
+                self.stop(False)
+                if self._clear:
+                    # 异步删除,避开在回调中自杀
+                    jobs().run(_del_timer, self._timer)
 
     def start(self, interval, times=0):
         """

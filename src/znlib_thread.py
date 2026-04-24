@@ -6,8 +6,8 @@
 #
 import usys
 import _thread
-from .znlib_base import baseError
 from .znlib_waiter import getWaiter
+from .znlib_base import baseError, locker, singleton
 
 
 class waitResult(object):
@@ -33,7 +33,7 @@ class waitResult(object):
 class innerThread(object):
     """将任务打包至线程"""
 
-    def __init__(self, fun, args, kwargs=None):
+    def __init__(self, fun, args=(), kwargs=None):
         self._fun = fun
         self._args = args
         self._kwargs = kwargs or {}
@@ -76,6 +76,57 @@ class innerThread(object):
     @property
     def ident(self):
         return self._ident
+
+
+class jobThread(singleton):
+    """
+    处理异步小事务的线程
+    """
+
+    def __init__(self):
+        if hasattr(self, "_initialized"):
+            return  # 已初始化
+        self._initialized = True
+
+        self._jobs = dict()
+        self._lock = locker()
+        self._waiter = getWaiter()
+        self._thread = innerThread(self._do_job)
+
+    def run(self, fun, *arg):
+        with self._lock:
+            self._jobs[fun] = arg
+
+        self._thread.start()
+        self._waiter.wakeup()
+
+    def _do_job(self):
+        while True:
+            fun = None
+            arg = ()
+            with self._lock:
+                if len(self._jobs) > 0:
+                    item = self._jobs.popitem()
+                    fun = item[0]
+                    arg = item[1]
+
+            if not fun is None:
+                try:
+                    fun(*arg)
+                except Exception as e:
+                    usys.print_exception(e)
+
+            with self._lock:
+                num = len(self._jobs)
+            if num < 1:  # 进入等待
+                self._waiter.waitFor(5000)
+
+
+def jobs():
+    """
+    启动作业线程
+    """
+    return jobThread()
 
 
 def startThread(fun, *arg, wait_result=False):
